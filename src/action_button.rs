@@ -5,7 +5,6 @@ use web_sys::{Event, MouseEvent};
 
 #[component]
 pub fn ActionButton(
-    cx: Scope,
     action: PapelitoAction,
     editor_key: String,
     content_ref: NodeRef<leptos::html::Div>,
@@ -41,7 +40,7 @@ pub fn ActionButton(
 
     if let Some(state) = action.state {
         let btn_id = unique_btn_id.clone();
-        content_ref.on_load(cx, move |c| {
+        content_ref.on_load(move |c| {
             let metadata = DataHandleBtnState {
                 button_id: btn_id.clone(),
                 selected_class: selected_class.clone(),
@@ -69,9 +68,9 @@ pub fn ActionButton(
         });
     }
 
-    view! {cx,
+    view! {
         <button title=action.title class=class on:click=on_click_btn id=unique_btn_id>
-            {(action.icon)(cx)}
+            {(action.icon)()}
         </button>
     }
 }

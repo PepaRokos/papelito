@@ -1,4 +1,4 @@
-use crate::action::{Action as PapelitoAction, Actions};
+use crate::action::Actions;
 use crate::action_button::ActionButton;
 use crate::util::exec_format_block;
 use lazy_static::lazy_static;
@@ -74,7 +74,6 @@ const ELEMENT_TEXT_NODE: u16 = 3;
 
 #[component]
 pub fn Papelito(
-    cx: Scope,
     /// A unique key for this editor instance
     key: String,
     content_signal: RwSignal<String>,
@@ -89,14 +88,14 @@ pub fn Papelito(
 
     let initial_value = content_signal.get();
 
-    let content_ref = create_node_ref::<Div>(cx);
+    let content_ref = create_node_ref::<Div>();
 
     let default_paragraph_separator = match default_paragraph_separator.is_empty() {
         true => Arc::new("div".to_string()),
         false => Arc::new(default_paragraph_separator.clone()),
     };
 
-    create_effect(cx, move |_| {
+    create_effect(move |_| {
         let content_val = content_signal.get();
         if let Some(content) = content_ref.get() {
             if content_val
@@ -105,7 +104,7 @@ pub fn Papelito(
                     .unwrap()
                     .inner_html()
             {
-                content.inner_html(content_val);
+                let _ = content.inner_html(content_val);
             }
         }
     });
@@ -119,9 +118,9 @@ pub fn Papelito(
     }
 
     let _key_clone = key.clone();
-    content_ref.on_load(cx, move |content| {
+    content_ref.on_load(move |content| {
         let initial_value_clone = initial_value.clone();
-        content.inner_html(initial_value_clone);
+        let _ = content.inner_html(initial_value_clone);
     });
 
     let separator_clone = default_paragraph_separator.clone();
@@ -170,18 +169,15 @@ pub fn Papelito(
     let key_clone = _key.clone();
     let selected_class = classes.selected.clone();
     let content_unique_id = format!("{}-content", key_clone);
-    view! { cx,
+    view! { 
         <div class=_classes.editor id=key>
             <div class=_classes.actionbar>
                 <For
                     each=move || actions.inner().clone()
                     key=|action| action.title.clone()
-                    view = move |cx, action: PapelitoAction| {
-                        view! {cx,
-                            <ActionButton selected_class=selected_class.clone() content_ref=content_ref action=action editor_key=_key.clone() class=classes.button.clone()/>
-                        }
-                    }
-                />
+                    let:action>
+                        <ActionButton selected_class=selected_class.clone() content_ref=content_ref action=action editor_key=_key.clone() class=classes.button.clone()/>
+                </For>
             </div>
             <div id=content_unique_id on:keydown=on_content_keydown on:input=on_content_change class=_classes.content ref=content_ref contentEditable="true"></div>
         </div>
